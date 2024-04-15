@@ -3,6 +3,8 @@
 namespace Nickstewart\Challenge;
 
 use Jenssegers\Blade\Blade;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class Loader {
 	/**
@@ -27,7 +29,17 @@ class Loader {
 	 * Setup actions
 	 */
 	public function init_actions(): void {
-		//
+		// Setup the REST endpoint
+		add_action('rest_api_init', function () {
+			register_rest_route('challenge/v1', '/1', [
+				'methods' => 'GET',
+				'callback' => [$this, 'api_people_request'],
+				'permission_callback' => function ($request) {
+					// No permissions required
+					return true;
+				},
+			]);
+		});
 	}
 
 	/**
@@ -35,5 +47,46 @@ class Loader {
 	 */
 	public function init_filters(): void {
 		//
+	}
+
+	/**
+	 * The people API endpoint
+	 */
+	public function api_people_request(): object {
+		$client = new Client([
+			'base_uri' => 'https://api.strategy11.com/wp-json/challenge/v1/',
+		]);
+
+		try {
+			$response = $client->request('GET', '1');
+
+			if ($response->getStatusCode() !== 200) {
+				return $this->helper_bad_request(
+					$response->getStatusCode(),
+					'There was an error',
+				);
+			}
+
+			$data = json_decode($response->getBody(), false);
+
+			if (empty($data)) {
+				return $this->helper_bad_request(500, 'There was an error');
+			}
+
+			return $data;
+		} catch (ClientException $e) {
+			return $this->helper_bad_request($e->getCode(), $e->getMessage());
+		} catch (\Exception $e) {
+			return $this->helper_bad_request(500, $e->getMessage());
+		}
+	}
+
+	/**
+	 * Helper function for request errors
+	 */
+	public function helper_bad_request($code, $message): object {
+		return new \WP_Error('error', $message, [
+			'status' => $code,
+		]);
 	}
 }
