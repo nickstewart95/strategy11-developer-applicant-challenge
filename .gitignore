@@ -1,0 +1,4 @@
+/src/vendor/
+/src/cache/
+.vscode
+.DS_STORE

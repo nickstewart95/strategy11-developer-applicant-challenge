@@ -1,0 +1,27 @@
+{
+	"name": "nickstewart/challenge",
+	"autoload": {
+		"psr-4": {
+			"Nickstewart\\Challenge\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Nick Stewart",
+			"email": "nick@nickstewart.me"
+		}
+	],
+	"config": {
+		"platform": {
+			"php": "8.0.0"
+		},
+		"vendor-dir": "src/vendor"
+	},
+	"require": {
+		"guzzlehttp/guzzle": "^7.8",
+		"jenssegers/blade": "^1.4"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.6"
+	}
+}
