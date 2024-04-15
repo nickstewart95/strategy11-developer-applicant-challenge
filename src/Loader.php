@@ -53,6 +53,14 @@ class Loader {
 	 * The people API endpoint
 	 */
 	public function api_people_request(): object {
+		// Check cache before request
+		$transientKey = 'challenge_data';
+		$transientData = get_transient($transientKey);
+
+		if (!empty($transientData)) {
+			return $transientData;
+		}
+
 		$client = new Client([
 			'base_uri' => 'https://api.strategy11.com/wp-json/challenge/v1/',
 		]);
@@ -72,6 +80,9 @@ class Loader {
 			if (empty($data)) {
 				return $this->helper_bad_request(500, 'There was an error');
 			}
+
+			// Cache lives for one hour
+			set_transient($transientKey, $data, HOUR_IN_SECONDS);
 
 			return $data;
 		} catch (ClientException $e) {
