@@ -7,6 +7,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
 class Loader {
+	const TRANSIENT_KEY = 'challenge_data';
+
 	/**
 	 * Run the plugin
 	 */
@@ -40,6 +42,18 @@ class Loader {
 				},
 			]);
 		});
+
+		// WP CLI Command to delete the transient
+		add_action('cli_init', function () {
+			\WP_CLI::add_command(
+				'challenge-delete',
+				[$this, 'cli_delete_transient'],
+				[
+					'shortdesc' =>
+						'Deletes the transients holding the challenge data',
+				],
+			);
+		});
 	}
 
 	/**
@@ -54,8 +68,7 @@ class Loader {
 	 */
 	public function api_people_request(): object {
 		// Check cache before request
-		$transientKey = 'challenge_data';
-		$transientData = get_transient($transientKey);
+		$transientData = get_transient(self::TRANSIENT_KEY);
 
 		if (!empty($transientData)) {
 			return $transientData;
@@ -83,7 +96,7 @@ class Loader {
 
 			// Cache lives for one hour
 			$data->timestamp = time();
-			set_transient($transientKey, $data, HOUR_IN_SECONDS);
+			set_transient(self::TRANSIENT_KEY, $data, HOUR_IN_SECONDS);
 
 			return $data;
 		} catch (ClientException $e) {
@@ -100,5 +113,16 @@ class Loader {
 		return new \WP_Error('error', $message, [
 			'status' => $code,
 		]);
+	}
+
+	/**
+	 * Command that deletes the transient data
+	 */
+	public function cli_delete_transient($args) {
+		if (delete_transient(self::TRANSIENT_KEY)) {
+			\WP_CLI::success('Deleted transient');
+		} else {
+			\WP_CLI::error('There was an error deleting the transient');
+		}
 	}
 }
