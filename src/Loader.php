@@ -13,24 +13,7 @@ class Loader {
 	 * Run the plugin
 	 */
 	public function setup(): void {
-		$this->init_rest();
-		$this->init_cli();
-	}
-
-	/**
-	 * Setup Blade templating
-	 */
-	public function init_blade_views(): Blade {
-		$views = __DIR__ . '/resources/pages';
-		$cache = __DIR__ . '/cache';
-
-		return new Blade($views, $cache);
-	}
-
-	/**
-	 * Setup custom REST endpoints
-	 */
-	public function init_rest(): void {
+		// Setup custom REST endpoint
 		add_action('rest_api_init', function () {
 			register_rest_route('challenge/v1', '/1', [
 				'methods' => 'GET',
@@ -41,13 +24,8 @@ class Loader {
 				},
 			]);
 		});
-	}
 
-	/**
-	 * Setup custom CLI commands
-	 */
-	public function init_cli(): void {
-		// WP CLI Command to delete the transient
+		// Setup custom CLI command
 		add_action('cli_init', function () {
 			\WP_CLI::add_command(
 				'challenge-delete',
@@ -58,6 +36,16 @@ class Loader {
 				],
 			);
 		});
+	}
+
+	/**
+	 * Setup Blade templating
+	 */
+	public function init_blade_views(): Blade {
+		$views = __DIR__ . '/resources/pages';
+		$cache = __DIR__ . '/cache';
+
+		return new Blade($views, $cache);
 	}
 
 	/**
