@@ -82,6 +82,7 @@ class Loader {
 			}
 
 			// Cache lives for one hour
+			$data->timestamp = time();
 			set_transient($transientKey, $data, HOUR_IN_SECONDS);
 
 			return $data;
