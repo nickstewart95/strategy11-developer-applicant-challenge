@@ -13,8 +13,8 @@ class Loader {
 	 * Run the plugin
 	 */
 	public function setup(): void {
-		$this->init_actions();
-		$this->init_filters();
+		$this->init_rest();
+		$this->init_cli();
 	}
 
 	/**
@@ -28,10 +28,9 @@ class Loader {
 	}
 
 	/**
-	 * Setup actions
+	 * Setup custom REST endpoints
 	 */
-	public function init_actions(): void {
-		// Setup the REST endpoint
+	public function init_rest(): void {
 		add_action('rest_api_init', function () {
 			register_rest_route('challenge/v1', '/1', [
 				'methods' => 'GET',
@@ -42,7 +41,12 @@ class Loader {
 				},
 			]);
 		});
+	}
 
+	/**
+	 * Setup custom CLI commands
+	 */
+	public function init_cli(): void {
 		// WP CLI Command to delete the transient
 		add_action('cli_init', function () {
 			\WP_CLI::add_command(
@@ -54,13 +58,6 @@ class Loader {
 				],
 			);
 		});
-	}
-
-	/**
-	 * Setup filters
-	 */
-	public function init_filters(): void {
-		//
 	}
 
 	/**
@@ -109,7 +106,7 @@ class Loader {
 	/**
 	 * Helper function for request errors
 	 */
-	public function helper_bad_request($code, $message): object {
+	public function helper_bad_request($code, $message): \WP_Error {
 		return new \WP_Error('error', $message, [
 			'status' => $code,
 		]);
@@ -118,7 +115,7 @@ class Loader {
 	/**
 	 * Command that deletes the transient data
 	 */
-	public function cli_delete_transient($args) {
+	public function cli_delete_transient($args): void {
 		if (delete_transient(self::TRANSIENT_KEY)) {
 			\WP_CLI::success('Deleted transient');
 		} else {
