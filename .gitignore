@@ -3,3 +3,4 @@
 .vscode
 .DS_STORE
 .phpunit.result.cache
+node_modules/
