@@ -101,6 +101,14 @@ class Loader {
 				return $this->helper_bad_request(500, 'There was an error');
 			}
 
+			// Convert timestamp to human readable format
+			// I wanted to keep everything as objects, hence the casting
+			$data->data->rows = (object) array_map(function ($item) {
+				$item->date = date('m/d/Y', $item->date);
+
+				return $item;
+			}, (array) $data->data->rows);
+
 			// Cache lives for one hour
 			$data->timestamp = time();
 			set_transient(self::TRANSIENT_KEY, $data, HOUR_IN_SECONDS);
