@@ -55,6 +55,9 @@ class Loader {
 
 		// Refresh data and redirect from the admin page
 		add_action('admin_init', [$this, 'refresh_redirect_settings_page']);
+
+		// Setup shortcode that returns data table
+		add_shortcode('applicant-challenge', [$this, 'data_shortcode']);
 	}
 
 	/**
@@ -133,7 +136,7 @@ class Loader {
 	/**
 	 * Add the plugin settings page
 	 */
-	public function admin_settings_page() {
+	public function admin_settings_page(): void {
 		add_options_page(
 			'Applicant Challenge',
 			'Applicant Challenge',
@@ -162,7 +165,7 @@ class Loader {
 	/**
 	 * Delete data and redirect in the admin
 	 */
-	public function refresh_redirect_settings_page() {
+	public function refresh_redirect_settings_page(): void {
 		if (isset($_GET['action']) && $_GET['action'] == 'refresh') {
 			delete_transient(self::TRANSIENT_KEY);
 			wp_redirect(
@@ -170,5 +173,23 @@ class Loader {
 			);
 			die();
 		}
+	}
+
+	/**
+	 * Returns a table of the data
+	 */
+	public function data_shortcode($atts, $content) {
+		// Including the JS vs checking each posts for the shortcode and enqueuing, went with including since the other seemed like overkill (for this plugin)
+
+		ob_start();
+
+		echo '<script src="' .
+			plugin_dir_url(__FILE__) .
+			'resources/build/global-min.js' .
+			'"></script>';
+		echo '<table id="applicant-challenge-table"></table>';
+
+		$content = ob_get_clean();
+		return $content;
 	}
 }

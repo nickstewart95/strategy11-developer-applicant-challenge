@@ -1,31 +1,21 @@
 var gulp = require('gulp');
 var sass = require('gulp-sass')(require('sass'));
-var plumber = require('gulp-plumber');
-var notify = require('gulp-notify');
-
-var config = {
-	src: 'src/resources/scss/global.scss',
-	dest: 'src/resources/build/',
-};
-
-var onError = function (err) {
-	notify.onError({
-		title: 'Gulp',
-		subtitle: 'Failure!',
-		message: 'Error: <%= error.message %>',
-		sound: 'Beep',
-	})(err);
-
-	this.emit('end');
-};
+var minify = require('gulp-minify');
 
 function defaultTask(cb) {
-	var stream = gulp
-		.src([config.src])
-		.pipe(plumber({ errorHandler: onError }))
-		.pipe(sass().on('error', sass.logError));
+	return new Promise(function (resolve, reject) {
+		gulp
+			.src('src/resources/js/global.js')
+			.pipe(minify())
+			.pipe(gulp.dest('src/resources/build/'));
 
-	return stream.pipe(gulp.dest(config.dest));
+		gulp
+			.src('src/resources/scss/global.scss')
+			.pipe(sass())
+			.pipe(gulp.dest('src/resources/build/'));
+
+		resolve();
+	});
 }
 
 exports.default = defaultTask;
