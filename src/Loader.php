@@ -36,6 +36,25 @@ class Loader {
 				],
 			);
 		});
+
+		// Enqueue scripts and styles
+		add_action('admin_enqueue_scripts', function () {
+			$style = 'resources/build/global.css';
+
+			wp_enqueue_style(
+				'challenge-admin-styles',
+				plugin_dir_url(__FILE__) . $style,
+				[],
+				filemtime(plugin_dir_path(__FILE__) . $style),
+				false,
+			);
+		});
+
+		// Setup custom admin page
+		add_action('admin_menu', [$this, 'admin_settings_page']);
+
+		// Refresh data and redirect from the admin page
+		add_action('admin_init', [$this, 'refresh_redirect_settings_page']);
 	}
 
 	/**
@@ -108,6 +127,48 @@ class Loader {
 			\WP_CLI::success('Deleted transient');
 		} else {
 			\WP_CLI::error('There was an error deleting the transient');
+		}
+	}
+
+	/**
+	 * Add the plugin settings page
+	 */
+	public function admin_settings_page() {
+		add_options_page(
+			'Applicant Challenge',
+			'Applicant Challenge',
+			'activate_plugins',
+			'challenge',
+			[$this, 'create_settings_page'],
+		);
+	}
+
+	/**
+	 * Create the actual plugin settings page
+	 */
+	public function create_settings_page(): void {
+		global $wpdb;
+
+		$blade = $GLOBALS['blade'];
+		$data = $this->api_people_request();
+		$message = isset($_GET['message']) ? 'Data refreshed' : false;
+
+		echo $blade->render('admin.settings', [
+			'data' => $data,
+			'message' => $message,
+		]);
+	}
+
+	/**
+	 * Delete data and redirect in the admin
+	 */
+	public function refresh_redirect_settings_page() {
+		if (isset($_GET['action']) && $_GET['action'] == 'refresh') {
+			delete_transient(self::TRANSIENT_KEY);
+			wp_redirect(
+				'/wp-admin/options-general.php?page=challenge&message=refreshed',
+			);
+			die();
 		}
 	}
 }
