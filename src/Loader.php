@@ -101,7 +101,15 @@ class Loader {
 				return $this->helper_bad_request(500, 'There was an error');
 			}
 
-			// Sanitize data and rebuild data, assumption is response is dirty
+			/**
+			 * Sanitization Notes
+			 * 	sanitize_text_field strips all tags
+			 * 	sanitize_email strips out all characters not allowed in an email
+			 * 	filter_var in this case is returning only postive numbers
+			 * 
+			 * Result should be clean data that can be stored and displayed
+			 */
+
 			$clean = [];
 			$clean['timestamp'] = time();
 			$clean['data']['headers'] = [];
