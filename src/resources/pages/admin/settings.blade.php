@@ -17,13 +17,13 @@
 		<table class="widefat fixed striped">
 			<thead>
 				<tr>
-				@foreach ($data->data->headers as $header)
+				@foreach ($data->data['headers'] as $header)
 					<td>{{ $header }}</td>
 				@endforeach
 				</tr>
 			</thead>
 			<tbody>
-				@foreach ($data->data->rows as $row)
+				@foreach ($data->data['rows'] as $row)
 					<tr>
 					@foreach ($row as $field)
 						<td>{{ $field}}</td>

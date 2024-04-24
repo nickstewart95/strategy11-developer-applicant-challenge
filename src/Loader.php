@@ -177,8 +177,6 @@ class Loader {
 	 * Create the actual plugin settings page
 	 */
 	public function create_settings_page(): void {
-		global $wpdb;
-
 		$blade = $GLOBALS['blade'];
 		$data = $this->api_people_request();
 		$message = isset($_GET['message']) ? 'Data refreshed' : false;

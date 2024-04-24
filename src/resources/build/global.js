@@ -32,11 +32,9 @@ fetch('/wp-json/challenge/v1/1')
 
 		holder += '</tbody>';
 
-		console.log(holder);
-
 		// Inject it
 		table.innerHTML = holder;
 	})
 	.catch(function (error) {
-		console.warn(error);
+		console.log(error);
 	});
