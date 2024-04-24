@@ -101,16 +101,35 @@ class Loader {
 				return $this->helper_bad_request(500, 'There was an error');
 			}
 
-			// Convert timestamp to human readable format
-			// I wanted to keep everything as objects, hence the casting
-			$data->data->rows = (object) array_map(function ($item) {
-				$item->date = date('m/d/Y', $item->date);
+			// Sanitize data and rebuild data, assumption is response is dirty
+			$clean = [];
+			$clean['timestamp'] = time();
+			$clean['data']['headers'] = [];
+			$clean['data']['rows'] = [];
 
-				return $item;
-			}, (array) $data->data->rows);
+			$clean['title'] = sanitize_text_field($data->title);
+
+			foreach ($data->data->headers as $header) {
+				$clean['data']['headers'][] = sanitize_text_field($header);
+			}
+
+			foreach ($data->data->rows as $key => $row) {
+				$tmp = [];
+				$tmp['id'] = filter_var($row->id, FILTER_SANITIZE_NUMBER_INT, ['options' => ['min_range' => 1]]);
+				$tmp['fname'] = sanitize_text_field($row->fname);
+				$tmp['lname'] = sanitize_text_field($row->lname);
+				$tmp['email'] = sanitize_email($row->email);
+
+				$date = filter_var($row->date, FILTER_SANITIZE_NUMBER_INT, ['options' => ['min_range' => 1]]);
+				$tmp['date'] = date('m/d/Y', $date);
+			
+				$key = sanitize_key($key);
+				$clean['data']['rows'][$key] = $tmp;
+			}
+
+			$data = (object) $clean;
 
 			// Cache lives for one hour
-			$data->timestamp = time();
 			set_transient(self::TRANSIENT_KEY, $data, HOUR_IN_SECONDS);
 
 			return $data;
@@ -186,7 +205,7 @@ class Loader {
 	/**
 	 * Returns a table of the data
 	 */
-	public function data_shortcode($atts, $content) {
+	public function data_shortcode($atts, $content): string {
 		// Including the JS vs checking each posts for the shortcode and enqueuing, went with including since the other seemed like overkill (for this plugin)
 
 		ob_start();
