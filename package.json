@@ -17,6 +17,7 @@
 		"sass": "^1.75.0"
 	},
 	"scripts": {
-		"package": "zip -r challenge.zip .  -x '.vscode/*' '.git/*' 'error.log' 'src/cache/*'"
+		"package": "zip -r challenge.zip .  -x '.vscode/*' '.git/*' 'error.log' 'src/cache/*'",
+		"test": "./src/vendor/bin/phpunit"
 	}
 }
